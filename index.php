@@ -140,133 +140,7 @@ class icit_srdb_ui extends icit_srdb
 // flag to bootstrap WP, Drupal or Joomla
         $bootstrap = true; // isset( $_GET[ 'bootstrap' ] );
 
-// discover environment
-        if ($bootstrap && $this->is_wordpress()) {
-
-// prevent warnings if the charset and collate aren't defined
-            if (!defined('DB_CHARSET')) {
-                define('DB_CHARSET', 'utf8');
-            }
-            if (!defined('DB_COLLATE')) {
-                define('DB_COLLATE', '');
-            }
-
-// populate db details
-            $name = DB_NAME;
-            $user = DB_USER;
-            $pass = DB_PASSWORD;
-
-// Port and host need to be split apart.
-            if (strstr(DB_HOST, ':') !== false) {
-                $parts = explode(':', DB_HOST);
-                $host = $parts[0];
-                $port_input = $parts[1];
-
-                $port = abs((int)$port_input);
-            } else {
-                $host = DB_HOST;
-                $port = 3306;
-            }
-
-            $charset = DB_CHARSET;
-            $collate = DB_COLLATE;
-
-            $this->response($name, $user, $pass, $host, $port, $charset, $collate);
-
-        } elseif ($bootstrap && $this->is_drupal()) {
-            $database = Database::getConnection();
-            $database_opts = $database->getConnectionOptions();
-
-// populate db details
-            $name = $database_opts['database'];
-            $user = $database_opts['username'];
-            $pass = $database_opts['password'];
-            $host = $database_opts['host'];
-            $port = $database_opts['port'];
-            $charset = 'utf8';
-            $collate = '';
-
-            $port_as_string = (string)$port ? (string)$port : "0";
-            if ((string)abs((int)$port) !== $port_as_string) {
-                $port = 3306;
-            } else {
-                $port = (string)abs((int)$port);
-            }
-
-            $this->response($name, $user, $pass, $host, $port, $charset, $collate);
-
-        } elseif ($bootstrap && $this->is_joomla()) {
-// Create a JConfig object
-            $jconfig = new JConfig();
-
-// populate db details
-            $name = $jconfig->db;
-            $user = $jconfig->user;
-            $pass = $jconfig->password;
-
-// Port and host need to be split apart.
-            if (strstr($jconfig->host, ':') !== false) {
-                $parts = explode(':', $jconfig->host);
-                $host = $parts[0];
-                $port_input = $parts[1];
-
-                $port = abs((int)$port_input);
-            } else {
-                $host = $jconfig->host;
-                $port = 3306;
-            }
-            $charset = 'utf8';
-            $collate = '';
-
-            $this->response($name, $user, $pass, $host, $port, $charset, $collate);
-        } elseif ($this->is_typo()) {
-
-// populate db details
-            $name = DB_NAME;
-            $user = DB_USER;
-            $pass = DB_PASSWORD;
-            $port = DB_PORT;
-            $host = DB_HOST;
-            $charset = 'utf8';
-            $collate = '';
-
-            $portAsString = (string)$port ? (string)$port : "0";
-            if ((string)abs((int)$port) !== $portAsString) {
-                $port = 3306;
-            } else {
-                $port = (string)abs((int)$port);
-            }
-
-            $this->response($name, $user, $pass, $host, $port, $charset, $collate);
-
-        } elseif ($bootstrap && $this->is_docker()) {
-            $name = '';
-            $user = 'root';
-            $pass = DB_PASSWORD;
-            $host = DB_HOST;
-            $port = DB_PORT;
-            $charset = 'utf8';
-            $collate = '';
-
-            $this->response($name, $user, $pass, $host, $port, $charset, $collate);
-
-        } elseif( $bootstrap && $this->is_magento2()) {
-            $config = MAGENTO2_CONFIG['db']['connection']['default'];
-            // populate db details
-            $name       = $config[ 'dbname' ];
-            $user       = $config[ 'username' ];
-            $pass       = $config[ 'password' ];
-            $host       = $config[ 'host' ];
-            $port       = 3306;
-            $charset    = 'utf8';
-            $collate    = '';
-            $this->response( $name, $user, $pass, $host, $port, $charset, $collate );
-        }else {
-
-            $this->response();
-
-        }
-
+        $this->response();
     }
 
     public function response($name = '', $user = '', $pass = '', $host = '127.0.0.1', $port = 3306, $charset = 'utf8', $collate = '')
@@ -771,24 +645,24 @@ class icit_srdb_ui extends icit_srdb
             } catch (Exception $error) {
 
 // try and get database values using regex approach
-                $db_details = $this->define_find($this->path . '/wp-config.php');
-
-                if ($db_details) {
-
-                    define('DB_NAME', $db_details['name']);
-                    define('DB_USER', $db_details['user']);
-                    define('DB_PASSWORD', $db_details['pass']);
-                    define('DB_HOST', $db_details['host']);
-                    define('DB_CHARSET', $db_details['char']);
-                    define('DB_COLLATE', $db_details['coll']);
-
-// additional error message
-                    $this->add_error('WordPress detected but could not bootstrap environment. There might be a PHP error, possibly caused by changes to the database', 'db');
-
-                }
-
-                if ($db_details)
-                    return true;
+//                $db_details = $this->define_find($this->path . '/wp-config.php');
+//
+//                if ($db_details) {
+//
+//                    define('DB_NAME', $db_details['name']);
+//                    define('DB_USER', $db_details['user']);
+//                    define('DB_PASSWORD', $db_details['pass']);
+//                    define('DB_HOST', $db_details['host']);
+//                    define('DB_CHARSET', $db_details['char']);
+//                    define('DB_COLLATE', $db_details['coll']);
+//
+//// additional error message
+//                    $this->add_error('WordPress detected but could not bootstrap environment. There might be a PHP error, possibly caused by changes to the database', 'db');
+//
+//                }
+//
+//                if ($db_details)
+//                    return true;
             }
         }
 
@@ -943,60 +817,60 @@ class icit_srdb_ui extends icit_srdb
      *
      * @return array    List of db connection details.
      */
-    public function define_find($filename = 'wp-config.php')
-    {
-
-        if ($filename == 'wp-config.php') {
-            $filename = dirname(__FILE__) . '/' . basename($filename);
-
-// look up one directory if config file doesn't exist in current directory
-            if (!file_exists($filename))
-                $filename = dirname(__FILE__) . '/../' . basename($filename);
-        }
-
-        if (file_exists($filename) && is_file($filename) && is_readable($filename)) {
-            $file = @fopen($filename, 'r');
-            $file_content = fread($file, filesize($filename));
-            @fclose($file);
-        }
-
-        preg_match_all('/define\s*?\(\s*?([\'"])(DB_NAME|DB_USER|DB_PASSWORD|DB_HOST|DB_CHARSET|DB_COLLATE)\1\s*?,\s*?([\'"])([^\3]*?)\3\s*?\)\s*?;/si', $file_content, $defines);
-
-        if ((isset($defines[2]) && !empty($defines[2])) && (isset($defines[4]) && !empty($defines[4]))) {
-            foreach ($defines[2] as $key => $define) {
-
-                switch ($define) {
-                    case 'DB_NAME':
-                        $name = $defines[4][$key];
-                        break;
-                    case 'DB_USER':
-                        $user = $defines[4][$key];
-                        break;
-                    case 'DB_PASSWORD':
-                        $pass = $defines[4][$key];
-                        break;
-                    case 'DB_HOST':
-                        $host = $defines[4][$key];
-                        break;
-                    case 'DB_CHARSET':
-                        $char = $defines[4][$key];
-                        break;
-                    case 'DB_COLLATE':
-                        $coll = $defines[4][$key];
-                        break;
-                }
-            }
-        }
-
-        return array(
-            'host' => $host,
-            'name' => $name,
-            'user' => $user,
-            'pass' => $pass,
-            'char' => $char,
-            'coll' => $coll
-        );
-    }
+//    public function define_find($filename = 'wp-config.php')
+//    {
+//
+//        if ($filename == 'wp-config.php') {
+//            $filename = dirname(__FILE__) . '/' . basename($filename);
+//
+//// look up one directory if config file doesn't exist in current directory
+//            if (!file_exists($filename))
+//                $filename = dirname(__FILE__) . '/../' . basename($filename);
+//        }
+//
+//        if (file_exists($filename) && is_file($filename) && is_readable($filename)) {
+//            $file = @fopen($filename, 'r');
+//            $file_content = fread($file, filesize($filename));
+//            @fclose($file);
+//        }
+//
+//        preg_match_all('/define\s*?\(\s*?([\'"])(DB_NAME|DB_USER|DB_PASSWORD|DB_HOST|DB_CHARSET|DB_COLLATE)\1\s*?,\s*?([\'"])([^\3]*?)\3\s*?\)\s*?;/si', $file_content, $defines);
+//
+//        if ((isset($defines[2]) && !empty($defines[2])) && (isset($defines[4]) && !empty($defines[4]))) {
+//            foreach ($defines[2] as $key => $define) {
+//
+//                switch ($define) {
+//                    case 'DB_NAME':
+//                        $name = $defines[4][$key];
+//                        break;
+//                    case 'DB_USER':
+//                        $user = $defines[4][$key];
+//                        break;
+//                    case 'DB_PASSWORD':
+//                        $pass = $defines[4][$key];
+//                        break;
+//                    case 'DB_HOST':
+//                        $host = $defines[4][$key];
+//                        break;
+//                    case 'DB_CHARSET':
+//                        $char = $defines[4][$key];
+//                        break;
+//                    case 'DB_COLLATE':
+//                        $coll = $defines[4][$key];
+//                        break;
+//                }
+//            }
+//        }
+//
+//        return array(
+//            'host' => $host,
+//            'name' => $name,
+//            'user' => $user,
+//            'pass' => $pass,
+//            'char' => $char,
+//            'coll' => $coll
+//        );
+//    }
 
 
     /**
