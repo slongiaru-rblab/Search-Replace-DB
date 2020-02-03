@@ -966,20 +966,17 @@ class icit_srdb {
 						if ( $update && ! empty( $where_sql ) ) {
 
 							$sql = 'UPDATE ' . $table . ' SET ' . implode( ', ', $update_sql ) . ' WHERE ' . implode( ' AND ', array_filter( $where_sql ) );
+                            $this->log( 'search_replace_update_sql', $table, $sql );
 
                             if ( $dry_run ) {
                                 // nothing for this state
-                                $this->log( 'search_replace_update_sql', $table, $sql );
-
                                 $report[ 'updates' ]++;
                                 $new_table_report[ 'updates' ]++;
                             } else {
                                 $result = $this->db_update( $sql );
 
                                 if ( ! is_int( $result ) && ! $result ) {
-
                                     $this->add_error( $this->db_error( ), 'results' );
-
                                 } else {
                                     $report[ 'updates' ]++;
                                     $new_table_report[ 'updates' ]++;
@@ -1194,15 +1191,6 @@ class icit_srdb {
 	 * @return string
 	 */
 	public function str_replace( $search, $replace, $string, &$count = 0 ) {
-        if($string === 'Magento\GiftCard\Model\Attribute\Backend\Giftcard\Amount') {
-            echo $string;
-            echo "\n";
-            echo $search;
-            echo "\n";
-            echo $replace;
-            echo "\n";
-        }
-
 		if ( $this->get( 'regex' ) ) {
 			return preg_replace( $search, $replace, $string, -1, $count );
 		} elseif( function_exists( 'mb_split' ) ) {
